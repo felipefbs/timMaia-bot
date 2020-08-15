@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "nodemon ./src/index.js"
+    "start": "node ./src/index.js"
   },
   "dependencies": {
     "discord.js": "^12.3.0",
