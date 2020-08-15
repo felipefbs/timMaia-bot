@@ -14,38 +14,37 @@ client.login(token);
 
 client.on("message", async (message) => {
   if (message.author.bot) return;
-  if (!message.content.startsWith(prefix)) return;
+  msg = message.content.toLowerCase();
+  if (!msg.startsWith(prefix)) return;
 
   const serverQueue = queue.get(message.guild.id);
 
-  if (message.content.startsWith(`${prefix} toca essa`)) {
-    const args = message.content.split(" ");
+  if (msg.startsWith(`${prefix} toca essa`)) {
+    const args = msg.split(" ");
     execute(message, serverQueue, { urlMusic: args[3] });
     return;
   }
-  if (message.content.startsWith(`${prefix} toca lofi`)) {
+  if (msg.startsWith(`${prefix} toca lofi`)) {
     url = Math.floor(Math.random() * lofiList.length);
     execute(message, serverQueue, { urlMusic: url, urlList: lofiList });
     return;
   }
-  if (message.content.startsWith(`${prefix} toca uma`)) {
+  if (msg.startsWith(`${prefix} toca uma`)) {
     url = Math.floor(Math.random() * musicList.length);
     execute(message, serverQueue, { urlMusic: url, urlList: musicList });
     return;
   }
-  if (message.content.startsWith(`${prefix} olha o breque`)) {
+  if (msg.startsWith(`${prefix} olha o breque`)) {
     stop(message, serverQueue);
     return;
   }
-  if (message.content.startsWith(`${prefix} passa essa`)) {
+  if (msg.startsWith(`${prefix} passa essa`)) {
     skip(message, serverQueue);
     return;
   }
 });
 
 async function execute(message, serverQueue, musicObj) {
-  const args = message.content.split(" ");
-
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel)
     return message.channel.send(
