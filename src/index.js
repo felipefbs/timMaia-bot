@@ -20,13 +20,17 @@ client.on("message", async (message) => {
 
   if (message.content.startsWith(`${prefix} toca essa`)) {
     const args = message.content.split(" ");
-    url = args[3];
-    execute(message, serverQueue, url);
+    execute(message, serverQueue, { urlMusic: args[3] });
     return;
   }
   if (message.content.startsWith(`${prefix} toca lofi`)) {
     url = Math.floor(Math.random() * lofiList.length);
-    execute(message, serverQueue, url);
+    execute(message, serverQueue, { urlMusic: url, urlList: lofiList });
+    return;
+  }
+  if (message.content.startsWith(`${prefix} toca uma`)) {
+    url = Math.floor(Math.random() * musicList.length);
+    execute(message, serverQueue, { urlMusic: url, urlList: musicList });
     return;
   }
   if (message.content.startsWith(`${prefix} olha o breque`)) {
@@ -39,7 +43,7 @@ client.on("message", async (message) => {
   }
 });
 
-async function execute(message, serverQueue, url) {
+async function execute(message, serverQueue, musicObj) {
   const args = message.content.split(" ");
 
   const voiceChannel = message.member.voice.channel;
@@ -54,11 +58,13 @@ async function execute(message, serverQueue, url) {
     );
   }
   let songInfo;
-  if (typeof url === "string") {
-    songInfo = await ytdl.getInfo(url);
-  } else if (typeof url === "number") {
-    songInfo = await ytdl.getInfo(lofiList[url]);
+
+  if (musicObj.urlList) {
+    songInfo = await ytdl.getInfo(musicObj.urlList[musicObj.urlMusic]);
+  } else {
+    songInfo = await ytdl.getInfo(musicObj.urlMusic);
   }
+
   const song = {
     title: songInfo.videoDetails.title,
     url: songInfo.videoDetails.video_url,
