@@ -1,8 +1,8 @@
-// TODO typescript it
 const Discord = require("discord.js");
 const ytdl = require("ytdl-core");
-
 require("dotenv").config();
+
+const { lofiList, musicList } = require("../util/urls.js");
 
 token = process.env.TOKEN;
 prefix = process.env.PREFIX;
@@ -12,40 +12,34 @@ const queue = new Map();
 
 client.login(token);
 
-client.once("ready", () => {
-  console.log("Ready!");
-});
-client.once("reconnecting", () => {
-  console.log("Reconnecting!");
-});
-client.once("disconnect", () => {
-  console.log("Disconnect!");
-});
-
 client.on("message", async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(prefix)) return;
 
   const serverQueue = queue.get(message.guild.id);
 
-  // TODO Refact this if else mess
-  if (message.content.startsWith(`${prefix}tocaessa`)) {
-    execute(message, serverQueue);
+  if (message.content.startsWith(`${prefix} toca essa`)) {
+    const args = message.content.split(" ");
+    url = args[3];
+    execute(message, serverQueue, url);
     return;
-  } else if (message.content.startsWith(`${prefix}skip`)) {
-    skip(message, serverQueue);
+  }
+  if (message.content.startsWith(`${prefix} toca lofi`)) {
+    url = Math.floor(Math.random() * lofiList.length);
+    execute(message, serverQueue, url);
     return;
-  } else if (message.content.startsWith(`${prefix}stop`)) {
+  }
+  if (message.content.startsWith(`${prefix} olha o breque`)) {
     stop(message, serverQueue);
     return;
-  } else {
-    message.channel.send("You need to enter a valid command!");
+  }
+  if (message.content.startsWith(`${prefix} passa essa`)) {
+    skip(message, serverQueue);
+    return;
   }
 });
 
-async function execute(message, serverQueue) {
-  const args = message.content.split(" ");
-
+async function execute(message, serverQueue, url) {
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel)
     return message.channel.send(
@@ -57,8 +51,12 @@ async function execute(message, serverQueue) {
       "I need the permissions to join and speak in your voice channel!"
     );
   }
-
-  const songInfo = await ytdl.getInfo(args[1]);
+  let songInfo;
+  if (typeof url === "string") {
+    songInfo = await ytdl.getInfo(url);
+  } else if (typeof url === "number") {
+    songInfo = await ytdl.getInfo(lofiList[url]);
+  }
   const song = {
     title: songInfo.videoDetails.title,
     url: songInfo.videoDetails.video_url,
