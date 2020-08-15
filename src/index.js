@@ -40,6 +40,8 @@ client.on("message", async (message) => {
 });
 
 async function execute(message, serverQueue, url) {
+  const args = message.content.split(" ");
+
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel)
     return message.channel.send(
