@@ -10,6 +10,12 @@ prefix = process.env.PREFIX;
 const client = new Discord.Client();
 const queue = new Map();
 
+const config = require('../util/data.json');
+const wrongChanelPlay = config.messages.channel.play;
+const wrongChanelStop = config.messages.channel.stop;
+const permissionError = config.messages.permission;
+const noSongToSkip = config.messages.song;
+
 client.login(token);
 
 client.on("message", async (message) => {
@@ -44,18 +50,18 @@ client.on("message", async (message) => {
   }
 });
 
-async function execute(message, serverQueue, musicObj) {
+
+const execute = async (message, serverQueue, musicObj) => {
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel)
-    return message.channel.send(
-      "You need to be in a voice channel to play music!"
-    );
+    return message.channel.send(`${wrongChanelPlay}`);
+
   const permissions = voiceChannel.permissionsFor(message.client.user);
+
   if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-    return message.channel.send(
-      "I need the permissions to join and speak in your voice channel!"
-    );
+    return message.channel.send(`${permissionError}`);
   }
+
   let songInfo;
 
   if (musicObj.urlList) {
@@ -100,7 +106,7 @@ async function execute(message, serverQueue, musicObj) {
   }
 }
 
-function play(guild, song) {
+const play = (guild, song) => {
   const serverQueue = queue.get(guild.id);
 
   if (!song) {
@@ -120,23 +126,19 @@ function play(guild, song) {
   serverQueue.textChannel.send(`Start playing **${song.title}**`);
 }
 
-function skip(message, serverQueue) {
+const skip = (message, serverQueue) => {
   if (!message.member.voice.channel) {
-    return message.channel.send(
-      "You have to be in a voice channel to stop the music!"
-    );
+    return message.channel.send(`${wrongChanelStop}`);
   }
   if (!serverQueue) {
-    return message.channel.send(" There is no song that I could skip");
+    return message.channel.send(`${noSongToSkip}`);
   }
   serverQueue.connection.dispatcher.end();
 }
 
-function stop(message, serverQueue) {
+const stop = (message, serverQueue) => {
   if (!message.member.voice.channel) {
-    return message.channel.send(
-      "You have to be in a voice channel to stop the music!"
-    );
+    return message.channel.send(`${wrongChanelStop}`);
   }
   serverQueue.songs = [];
   serverQueue.connection.dispatcher.end();
