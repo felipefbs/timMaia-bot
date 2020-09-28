@@ -3,6 +3,7 @@ const ytdl = require("ytdl-core");
 require("dotenv").config();
 
 const { lofiList, musicList } = require("../util/urls.js");
+const strings = require('../util/strings.js');
 
 token = process.env.TOKEN;
 prefix = process.env.PREFIX;
@@ -44,18 +45,18 @@ client.on("message", async (message) => {
   }
 });
 
+
 async function execute(message, serverQueue, musicObj) {
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel)
-    return message.channel.send(
-      "You need to be in a voice channel to play music!"
-    );
+    return message.channel.send(`${strings.channelPlayError}`);
+
   const permissions = voiceChannel.permissionsFor(message.client.user);
+
   if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
-    return message.channel.send(
-      "I need the permissions to join and speak in your voice channel!"
-    );
+    return message.channel.send(`${strings.permissionError}`);
   }
+
   let songInfo;
 
   if (musicObj.urlList) {
@@ -122,21 +123,17 @@ function play(guild, song) {
 
 function skip(message, serverQueue) {
   if (!message.member.voice.channel) {
-    return message.channel.send(
-      "You have to be in a voice channel to stop the music!"
-    );
+    return message.channel.send(`${strings.channelStopError}`);
   }
   if (!serverQueue) {
-    return message.channel.send(" There is no song that I could skip");
+    return message.channel.send(`${strings.noSongError}`);
   }
   serverQueue.connection.dispatcher.end();
 }
 
 function stop(message, serverQueue) {
   if (!message.member.voice.channel) {
-    return message.channel.send(
-      "You have to be in a voice channel to stop the music!"
-    );
+    return message.channel.send(`${strings.channelStopError}`);
   }
   serverQueue.songs = [];
   serverQueue.connection.dispatcher.end();
